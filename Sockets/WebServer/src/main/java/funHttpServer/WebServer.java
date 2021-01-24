@@ -17,6 +17,7 @@ write a response back
 package funHttpServer;
 
 import java.io.*;
+import org.json.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -201,23 +202,42 @@ class WebServer {
           // extract path parameters
           query_pairs = splitQuery(request.replace("multiply?", ""));
 
-          // extract required fields from parameters
-          Integer num1 = Integer.parseInt(query_pairs.get("num1"));
-          Integer num2 = Integer.parseInt(query_pairs.get("num2"));
-
-          // do math
-          Integer result = num1 * num2;
-
-          // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Result is: " + result);
-
-          // TODO: Include error handling here with a correct error code and
+	  // TODO: Include error handling here with a correct error code and
           // a response that makes sense
 
-        } else if (request.contains("github?")) {
+ 
+          Integer result;
+	  Integer num1;
+	  Integer num2;
+
+	  if(query_pairs.get("num1") == null || query_pairs.get("num2") == null){
+	        // Generate response
+	        builder.append("HTTP/1.1 400 Bad Request\n");
+	        builder.append("Content-Type: text/html; charset=utf-8\n");
+
+	        builder.append("\n");
+		builder.append("Both parameters num1 and num2 are needed!\n");
+		builder.append("<br />");
+          	builder.append("\nResult is: " + "<b>undefined<b/>");
+		
+
+	  }else{
+            	 // extract required fields from parameters
+	          num1 = Integer.parseInt(query_pairs.get("num1"));
+	          num2 = Integer.parseInt(query_pairs.get("num2"));
+	
+	          // do math
+	          result = num1 * num2;
+	
+	
+	          // Generate response
+	          builder.append("HTTP/1.1 200 OK\n");
+	          builder.append("Content-Type: text/html; charset=utf-8\n");
+	          builder.append("\n");
+	          builder.append("Result is: " + result);
+	  }
+
+          } else if (request.contains("github?")) {
           // pulls the query from the request and runs it with GitHub's REST API
           // check out https://docs.github.com/rest/reference/
           //
@@ -231,9 +251,18 @@ class WebServer {
           String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
           System.out.println(json);
 
-          builder.append("Check the todos mentioned in the Java source file");
           // TODO: Parse the JSON returned by your fetch and create an appropriate
           // response
+          JSONArray jsonArr = new JSONArray(json);
+	  builder.append("\n");
+         for(int i = 0; i < jsonArr.length(); i++){
+
+		JSONObject ownerObj = jsonArr.getJSONObject(i).getJSONObject("owner");
+	        builder.append(jsonArr.getJSONObject(i).getInt("id") + ", ");
+		builder.append(ownerObj.getString("login") + " -> ");
+		builder.append(jsonArr.getJSONObject(i).getString("name"));
+		builder.append("\n");
+	 }
           // and list the owner name, owner id and name of the public repo on your webpage, e.g.
           // amehlhase, 46384989 -> memoranda
           // amehlhase, 46384989 -> ser316examples
