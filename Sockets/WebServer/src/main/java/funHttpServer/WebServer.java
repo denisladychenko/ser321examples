@@ -258,7 +258,7 @@ class WebServer {
          for(int i = 0; i < jsonArr.length(); i++){
 
 		JSONObject ownerObj = jsonArr.getJSONObject(i).getJSONObject("owner");
-	        builder.append(jsonArr.getJSONObject(i).getInt("id") + ", ");
+	        builder.append(ownerObj.getInt("id") + ", ");
 		builder.append(ownerObj.getString("login") + " -> ");
 		builder.append(jsonArr.getJSONObject(i).getString("name"));
 		builder.append("\n");
